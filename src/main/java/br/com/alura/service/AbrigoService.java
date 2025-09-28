@@ -30,7 +30,7 @@ public class AbrigoService {
         var abrigo = new Abrigo(nome, telefone, email);
 
         String uri = "http://localhost:8080/abrigos";
-        HttpResponse<String> response = client.disparaPost(uri, json);
+        HttpResponse<String> response = client.disparaPost(uri, abrigo);
         int statusCode = response.statusCode();
         String responseBody = response.body();
         if (statusCode == 200) {
