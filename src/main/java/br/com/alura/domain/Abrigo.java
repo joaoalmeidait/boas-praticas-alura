@@ -14,6 +14,10 @@ public class Abrigo {
         this.email = email;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Abrigo() {
     }
 
@@ -35,5 +39,12 @@ public class Abrigo {
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return """
+                "id":%s,"nome":"%s","telefone":"%s","email":"%s"
+                """.formatted(this.id, this.nome, this.telefone, this.email);
     }
 }
