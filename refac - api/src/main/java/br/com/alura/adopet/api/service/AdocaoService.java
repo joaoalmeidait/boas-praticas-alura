@@ -5,8 +5,6 @@ import br.com.alura.adopet.api.model.Adocao;
 import br.com.alura.adopet.api.model.StatusAdocao;
 import br.com.alura.adopet.api.repository.AdocaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,7 +18,7 @@ public class AdocaoService {
     private AdocaoRepository repository;
 
     @Autowired
-    private JavaMailSender emailSender;
+    private EmailService emailService;
 
     public void solicitar(Adocao adocao) {
         if (adocao.getPet().getAdotado() == true) {
@@ -47,28 +45,28 @@ public class AdocaoService {
                 }
             }
         }
+
         adocao.setData(LocalDateTime.now());
         adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getPet().getAbrigo().getEmail());
-        email.setSubject("Solicitação de adoção");
-        email.setText("Olá " + adocao.getPet().getAbrigo().getNome() + "!\n\nUma solicitação de adoção foi registrada hoje para o pet: " + adocao.getPet().getNome() + ". \nFavor avaliar para aprovação ou reprovação.");
-        emailSender.send(email);
+        var to = (adocao.getTutor().getEmail());
+        var subject = "Solicitação de adoção";
+        var message = "Olá " + adocao.getPet().getAbrigo().getNome() + "!\n\nUma solicitação de adoção foi registrada hoje para o pet: " + adocao.getPet().getNome() + ". \nFavor avaliar para aprovação ou reprovação.";
+
+        emailService.enviarEmail(to, subject, message);
+
     }
 
     public void aprovar(Adocao adocao) {
         adocao.setStatus(StatusAdocao.APROVADO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getTutor().getEmail());
-        email.setSubject("Adoção aprovada");
-        email.setText("Parabéns " + adocao.getTutor().getNome() + "!\n\nSua adoção do pet " + adocao.getPet().getNome() + ", solicitada em " + adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + ", foi aprovada.\nFavor entrar em contato com o abrigo " + adocao.getPet().getAbrigo().getNome() + " para agendar a busca do seu pet.");
-        emailSender.send(email);
+        var to = adocao.getTutor().getEmail();
+        var subject = "Adoção aprovada";
+        var message = "Parabéns " + adocao.getTutor().getNome() + "!\n\nSua adoção do pet " + adocao.getPet().getNome() + ", solicitada em " + adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + ", foi aprovada.\nFavor entrar em contato com o abrigo " + adocao.getPet().getAbrigo().getNome() + " para agendar a busca do seu pet.";
+
+        emailService.enviarEmail(to, subject, message);
 
     }
 
@@ -76,12 +74,11 @@ public class AdocaoService {
         adocao.setStatus(StatusAdocao.REPROVADO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getTutor().getEmail());
-        email.setSubject("Adoção reprovada");
-        email.setText("Olá " + adocao.getTutor().getNome() + "!\n\nInfelizmente sua adoção do pet " + adocao.getPet().getNome() + ", solicitada em " + adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + ", foi reprovada pelo abrigo " + adocao.getPet().getAbrigo().getNome() + " com a seguinte justificativa: " + adocao.getJustificativaStatus());
-        emailSender.send(email);
+        var to = (adocao.getTutor().getEmail());
+        var subject = "Adoção reprovada";
+        var message = "Olá " + adocao.getTutor().getNome() + "!\n\nInfelizmente sua adoção do pet " + adocao.getPet().getNome() + ", solicitada em " + adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + ", foi reprovada pelo abrigo " + adocao.getPet().getAbrigo().getNome() + " com a seguinte justificativa: " + adocao.getJustificativaStatus();
+
+        emailService.enviarEmail(to, subject, message);
 
     }
 }
