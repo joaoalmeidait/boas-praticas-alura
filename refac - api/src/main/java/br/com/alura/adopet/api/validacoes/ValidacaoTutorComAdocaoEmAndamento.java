@@ -2,10 +2,8 @@ package br.com.alura.adopet.api.validacoes;
 
 import br.com.alura.adopet.api.dto.SolicitacaoAdocaoDTO;
 import br.com.alura.adopet.api.exception.ValidacaoException;
-import br.com.alura.adopet.api.model.Adocao;
 import br.com.alura.adopet.api.model.StatusAdocao;
 import br.com.alura.adopet.api.repository.AdocaoRepository;
-import br.com.alura.adopet.api.repository.TutorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,17 +13,12 @@ public class ValidacaoTutorComAdocaoEmAndamento implements ValidacaoSolicitacaoA
     @Autowired
     private AdocaoRepository adocaoRepository;
 
-    @Autowired
-    private TutorRepository tutorRepository;
-
     public void validar(SolicitacaoAdocaoDTO dto) {
-        var adocoes = adocaoRepository.findAll();
-        var tutuor = tutorRepository.getReferenceById(dto.idTutor());
+        var tutorComAdocaoEmAndamento = adocaoRepository.existsByTutorIdAndStatus(dto.idTutor(), StatusAdocao.AGUARDANDO_AVALIACAO);
 
-        for (Adocao a : adocoes) {
-            if (a.getTutor() == tutuor && a.getStatus() == StatusAdocao.AGUARDANDO_AVALIACAO) {
-                throw new ValidacaoException("Tutor já possui outra adoção aguardando avaliação!");
-            }
+        if (tutorComAdocaoEmAndamento) {
+            throw new ValidacaoException("Tutor já possui outra adoção aguardando avaliação!");
         }
+
     }
 }
