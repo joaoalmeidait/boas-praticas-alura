@@ -1,4 +1,6 @@
 package br.com.alura.adopet.api.dto;
 
-public record AprovacaoDTO(Long idAdocao) {
+import jakarta.validation.constraints.NotNull;
+
+public record AprovacaoDTO(@NotNull Long idAdocao) {
 }
