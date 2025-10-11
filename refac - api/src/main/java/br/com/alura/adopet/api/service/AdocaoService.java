@@ -4,7 +4,6 @@ import br.com.alura.adopet.api.dto.AprovacaoDTO;
 import br.com.alura.adopet.api.dto.ReprovacaoAdocaoDTO;
 import br.com.alura.adopet.api.dto.SolicitacaoAdocaoDTO;
 import br.com.alura.adopet.api.model.Adocao;
-import br.com.alura.adopet.api.model.StatusAdocao;
 import br.com.alura.adopet.api.repository.AdocaoRepository;
 import br.com.alura.adopet.api.repository.PetRepository;
 import br.com.alura.adopet.api.repository.TutorRepository;
@@ -12,7 +11,6 @@ import br.com.alura.adopet.api.validacoes.ValidacaoSolicitacaoAdocao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -34,6 +32,9 @@ public class AdocaoService {
     @Autowired
     private List<ValidacaoSolicitacaoAdocao> validacoes;
 
+    public AdocaoService() {
+    }
+
     public void solicitar(SolicitacaoAdocaoDTO dto) {
 
         var pet = petRepository.getReferenceById(dto.idPet());
@@ -41,12 +42,7 @@ public class AdocaoService {
 
         validacoes.forEach(v -> v.validar(dto));
 
-        var adocao = new Adocao();
-        adocao.setData(LocalDateTime.now());
-        adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
-        adocao.setPet(pet);
-        adocao.setTutor(tutor);
-        adocao.setMotivo(dto.motivo());
+        var adocao = new Adocao(tutor, pet, dto.motivo());
         repository.save(adocao);
 
         var to = (adocao.getTutor().getEmail());
@@ -59,7 +55,7 @@ public class AdocaoService {
 
     public void aprovar(AprovacaoDTO dto) {
         var adocao = repository.getReferenceById(dto.idAdocao());
-        adocao.setStatus(StatusAdocao.APROVADO);
+        adocao.marcarComoAprovada();
 
         var to = adocao.getTutor().getEmail();
         var subject = "Adoção aprovada";
@@ -73,8 +69,7 @@ public class AdocaoService {
 
         var adocao = repository.getReferenceById(dto.idAdocao());
 
-        adocao.setStatus(StatusAdocao.REPROVADO);
-        adocao.setJustificativaStatus(dto.justificativa());
+        adocao.marcarComoReprovado(dto.justificativa());
 
         var to = (adocao.getTutor().getEmail());
         var subject = "Adoção reprovada";
