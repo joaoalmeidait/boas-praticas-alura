@@ -3,6 +3,7 @@ package br.com.alura.adopet.api.controller;
 import br.com.alura.adopet.api.dto.AbrigoDTO;
 import br.com.alura.adopet.api.dto.CadastrarAbrigoDTO;
 import br.com.alura.adopet.api.dto.CadastrarPetDTO;
+import br.com.alura.adopet.api.dto.PetDTO;
 import br.com.alura.adopet.api.exception.ValidacaoException;
 import br.com.alura.adopet.api.model.Pet;
 import br.com.alura.adopet.api.service.AbrigoService;
@@ -39,16 +40,16 @@ public class AbrigoController {
     }
 
     @GetMapping("/{id}/pets")
-    public ResponseEntity<List<Pet>> listarPetsByID(@PathVariable Long id) {
+    public ResponseEntity<List<PetDTO>> listarPets(@PathVariable Long id) {
         try {
-            var pets = abrigoService.listarPetByID(id);
-            return ResponseEntity.ok(pets);
-        } catch (ValidacaoException e) {
+            List<PetDTO> petsDoAbrigo = abrigoService.listarPetByID(id);
+            return ResponseEntity.ok(petsDoAbrigo);
+        } catch (ValidacaoException exception) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/{nome}/pets")
+    @GetMapping("/name/{nome}/pets")
     public ResponseEntity<List<Pet>> listarPetsByID(@PathVariable String  nome) {
         try {
             var pets = abrigoService.listarPetByNome(nome);
@@ -58,7 +59,7 @@ public class AbrigoController {
         }
     }
 
-    @PostMapping("/{idOuNome}/pets")
+    @PostMapping("/{id}/pets")
     @Transactional
     public ResponseEntity<String> cadastrarPet(@PathVariable Long id, @RequestBody @Valid CadastrarPetDTO dto) {
         try {
