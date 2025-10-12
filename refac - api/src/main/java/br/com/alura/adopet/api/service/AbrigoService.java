@@ -29,7 +29,7 @@ public class AbrigoService {
     }
 
     public void cadastrarAbrigo(CadastrarAbrigoDTO dto) {
-        boolean jaCadastrado = repository.existsNyNomeOrEmailOrTelefone(dto.nome(), dto.email(), dto.telefone());
+        boolean jaCadastrado = repository.existsByNomeOrEmailOrTelefone(dto.nome(), dto.email(), dto.telefone());
 
         if (jaCadastrado) {
             throw new ValidacaoException("Dados já cadastrados para outro abrigo!");
